@@ -38,7 +38,7 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, Name, StartDate, EndDate, MaxAttendees, FROM TrainingProgram
+                        SELECT Id, Name, StartDate, EndDate, MaxAttendees FROM TrainingProgram
                         WHERE 1=1";
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -77,42 +77,95 @@ namespace BangazonAPI.Controllers
                         SELECT tp.Id as TrainingProgramID, tp.Name, tp.StartDate, tp.EndDate, tp.MaxAttendees, et.Id as EmployeeTrainingId, et.EmployeeId, et.TrainingProgramId, e.Id AS EmployeeId, e.FirstName, e.LastName, e.DepartmentId, e.Email, e.IsSupervisor, e.ComputerId FROM TrainingProgram tp
                         LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = tp.Id
                         LEFT JOIN Employee e ON et.EmployeeId = e.Id
-                        WHERE 1=1";
+                        WHERE tp.Id = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     TrainingProgram trainingProgram = null;
 
-                    if (reader.Read())
+                    while (reader.Read())
                     {
-                        trainingProgram = new TrainingProgram
+                        if (trainingProgram == null)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("TrainingProgramID")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
-                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
-                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
-                            Employees = new List<Employee>()
-                        };
+                            trainingProgram = new TrainingProgram
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("TrainingProgramID")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
+                                Employees = new List<Employee>()
+                            };
+                        }
 
-                        trainingProgram.Employees.Add(new Employee()
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            Email = reader.GetString(reader.GetOrdinal("Email")),
-                            IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
-                            ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId"))
-                        });
-                        reader.Close();
+                            Employee employeeToAdd = new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                Email = reader.GetString(reader.GetOrdinal("Email")),
+                                IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
+                            };
 
-                        return Ok(trainingProgram);
+                            if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                            {
+                                employeeToAdd.ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId"));
+                            }
+                            trainingProgram.Employees.Add(employeeToAdd);
+                        }
+
                     }
-                    else
-                    {
-                        return NotFound();
-                    }
+                    reader.Close();
+                    return Ok(trainingProgram);
+                }
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] TrainingProgram trainingProgram)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO TrainingProgram (Name, StartDate, EndDate, MaxAttendees)
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@name, @startDate, @endDate, @maxAttendees)";
+                    cmd.Parameters.Add(new SqlParameter("@name", trainingProgram.Name));
+                    cmd.Parameters.Add(new SqlParameter("@startDate", trainingProgram.StartDate));
+                    cmd.Parameters.Add(new SqlParameter("@endDate", trainingProgram.EndDate));
+                    cmd.Parameters.Add(new SqlParameter("@maxAttendees", trainingProgram.MaxAttendees));
+
+                    int newId = (int)cmd.ExecuteScalar();
+                    trainingProgram.Id = newId;
+                    return CreatedAtRoute("GetTrainingProgram", new { id = newId }, trainingProgram);
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("{id}/employees")]
+        public async Task<IActionResult> Post([FromBody] Employee employee, [FromRoute] int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@employeeId, @trainingProgramID)";
+                    cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
+                    cmd.Parameters.Add(new SqlParameter("@trainingProgramID", id));
+
+                    cmd.ExecuteNonQuery();
+                    return RedirectToRoute("GetTrainingProgram", new { id = id });
                 }
             }
         }
