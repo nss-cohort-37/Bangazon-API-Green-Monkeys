@@ -80,13 +80,13 @@ namespace BangazonAPI.Controllers
 
                     int newId = (int)cmd.ExecuteScalar();
                     product.Id = newId;
-                    return CreatedAtRoute("GetProduct", new { id = newId }, product);
+                    return CreatedAtRoute( new { id = newId }, product);
                 }
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Employee employee)
+        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Product product)
         {
             try
             {
@@ -95,21 +95,21 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"UPDATE Employee
-                                            SET FirstName = @firstName,
-                                                LastName = @lastName,
-                                                DepartmentId = @departmentId,
-                                                IsSupervisor = @isSupervisor,
-                                                ComputerId = @computerId,
-                                                Email = @email
+                        cmd.CommandText = @"UPDATE Product
+                                            SET DateAdded = @dateAdded,
+                                                ProductTypeId = @productTypeId,
+                                                CustomerId = @customerId,
+                                                Price = @price,
+                                                Title = @title,
+                                                Description = @description
                                             WHERE Id = @id";
 
-                        cmd.Parameters.Add(new SqlParameter("@firstName", employee.FirstName));
-                        cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
-                        cmd.Parameters.Add(new SqlParameter("@isSupervisor", employee.IsSupervisor));
-                        cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
-                        cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
+                        cmd.Parameters.Add(new SqlParameter("@dateAdded", product.DateAdded));
+                        cmd.Parameters.Add(new SqlParameter("@productTypeId", product.ProductTypeId));
+                        cmd.Parameters.Add(new SqlParameter("@customerId", product.CustomerId));
+                        cmd.Parameters.Add(new SqlParameter("@price", product.Price));
+                        cmd.Parameters.Add(new SqlParameter("@title", product.Title));
+                        cmd.Parameters.Add(new SqlParameter("@description", product.Description));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
