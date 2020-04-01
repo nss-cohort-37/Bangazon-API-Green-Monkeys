@@ -148,8 +148,8 @@ namespace BangazonAPI.Controllers
                     cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
                     cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
                     cmd.Parameters.Add(new SqlParameter("@isSupervisor", employee.IsSupervisor));
-                    cmd.Parameters.Add(new SqlParameter("@departmentId", employee.ComputerId));
-                    cmd.Parameters.Add(new SqlParameter("@departmentId", employee.Email));
+                    cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
+                    cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
 
                     int newId = (int)cmd.ExecuteScalar();
                     employee.Id = newId;
