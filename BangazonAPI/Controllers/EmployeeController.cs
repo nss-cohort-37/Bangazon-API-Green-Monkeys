@@ -28,7 +28,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] string firstName, [FromQuery] string lastName)
         {
             using (SqlConnection conn = Connection)
             {
@@ -37,7 +37,20 @@ namespace BangazonAPI.Controllers
                 {
                     cmd.CommandText =
                      @"Select e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor, e.Email, e.ComputerId  
-                     FROM Employee e";
+                     FROM Employee e
+                     Where 1 = 1";
+
+                    if (firstName != null)
+                    {
+                        cmd.CommandText += " AND FirstName Like @firstName";
+                        cmd.Parameters.Add(new SqlParameter("@firstName", "%" + firstName + "%"));
+                    }
+
+                    if (lastName != null)
+                    {
+                        cmd.CommandText += " AND LastName Like @lastName";
+                        cmd.Parameters.Add(new SqlParameter("@lastName", "%" + lastName + "%"));
+                    }
 
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -122,12 +135,15 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId)
+                    cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId, IsSupervisor, ComputerId, Email)
                                         OUTPUT INSERTED.Id
-                                        VALUES (@firstName, @lastName, @departmentId)";
+                                        VALUES (@firstName, @lastName, @departmentId, @isSupervisor, @computerId, @email)";
                     cmd.Parameters.Add(new SqlParameter("@firstName", employee.FirstName));
                     cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
                     cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
+                    cmd.Parameters.Add(new SqlParameter("@isSupervisor", employee.IsSupervisor));
+                    cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
+                    cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
 
                     int newId = (int)cmd.ExecuteScalar();
                     employee.Id = newId;
