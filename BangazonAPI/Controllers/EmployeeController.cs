@@ -109,14 +109,20 @@ namespace BangazonAPI.Controllers
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                 PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                                DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
+                              
                                 Make = reader.GetString(reader.GetOrdinal("Make")),
                                 Model = reader.GetString(reader.GetOrdinal("Model"))
                             }
 
-
-
                         };
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            employee.Computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+                        else
+                        {
+                            employee.Computer.DecomissionDate = null;
+                        }
                         reader.Close();
                         return Ok(employee);
                     }
@@ -142,8 +148,8 @@ namespace BangazonAPI.Controllers
                     cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
                     cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
                     cmd.Parameters.Add(new SqlParameter("@isSupervisor", employee.IsSupervisor));
-                    cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
-                    cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
+                    cmd.Parameters.Add(new SqlParameter("@departmentId", employee.ComputerId));
+                    cmd.Parameters.Add(new SqlParameter("@departmentId", employee.Email));
 
                     int newId = (int)cmd.ExecuteScalar();
                     employee.Id = newId;
