@@ -13,9 +13,9 @@ namespace BangazonAPI.Models
         public int DepartmentId { get; set; }
         public string Email { get; set; }
         public bool IsSupervisor { get; set; }
-        public int ComputerId { get; set; }
+        public int? ComputerId { get; set; }
         public Computer Computer { get; set; }
-
+        
 
 
     }
