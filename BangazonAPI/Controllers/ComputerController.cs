@@ -32,7 +32,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] string include)
         {
             using (SqlConnection conn = Connection)
             {
@@ -152,7 +152,17 @@ namespace BangazonAPI.Controllers
                                             SET PurchaseDate = @purchaseDate, DecomissionDate = @decomissionDate, Make = @make, Model = @model
                                             WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@purchaseDate", computer.PurchaseDate));
-                        cmd.Parameters.Add(new SqlParameter("@decomissionDate", computer.DecomissionDate));
+
+                        if(computer.DecomissionDate == null)
+                        {
+
+                        cmd.Parameters.Add(new SqlParameter("@decomissionDate", DBNull.Value));
+                        }
+                        else
+                        {
+                            cmd.Parameters.Add(new SqlParameter("@decomissionDate", computer.DecomissionDate));
+                        }
+
                         cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
                         cmd.Parameters.Add(new SqlParameter("@model", computer.Model));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
@@ -189,7 +199,7 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"DELETE FROM Dog WHERE Id = @id";
+                        cmd.CommandText = @"DELETE FROM Computer WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
