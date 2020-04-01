@@ -106,7 +106,7 @@ namespace BangazonAPI.Controllers
                             Email = reader.GetString(reader.GetOrdinal("Email")),
                             ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                             Computer = new Computer
-                            {
+                            {   
                                 Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                 PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                               
@@ -171,12 +171,18 @@ namespace BangazonAPI.Controllers
                         cmd.CommandText = @"UPDATE Employee
                                             SET FirstName = @firstName,
                                                 LastName = @lastName,
-                                                DepartmentId = @departmentId
+                                                DepartmentId = @departmentId,
+                                                IsSupervisor = @isSupervisor,
+                                                ComputerId = @computerId,
+                                                Email = @email
                                             WHERE Id = @id";
 
                         cmd.Parameters.Add(new SqlParameter("@firstName", employee.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
                         cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@isSupervisor", employee.IsSupervisor));
+                        cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
+                        cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
@@ -235,6 +241,7 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
+
         private bool EmployeeExists(int id)
         {
             using (SqlConnection conn = Connection)
