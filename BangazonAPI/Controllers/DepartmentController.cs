@@ -105,17 +105,22 @@ namespace BangazonAPI.Controllers
                             };
                         }
                         if (include == "employees")
+                            
                         {
-                            department.Employees.Add(new Employee()
+                            if (!reader.IsDBNull(reader.GetOrdinal("DepartmentId")))
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
-                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                                Email = reader.GetString(reader.GetOrdinal("Email")),
-                                ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                                IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
-                            });
+                                department.Employees.Add(new Employee()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                    Email = reader.GetString(reader.GetOrdinal("Email")),
+                                    ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                                    IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
+                                });
+                            }
+                           
                         }
                        
                     }
