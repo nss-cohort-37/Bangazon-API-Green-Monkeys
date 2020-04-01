@@ -60,6 +60,7 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
+        //post
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Product product)
         {
@@ -71,7 +72,7 @@ namespace BangazonAPI.Controllers
                     cmd.CommandText = @"INSERT INTO Product (DateAdded, ProductTypeId, CustomerId, Price, Title, Description)
                                         OUTPUT INSERTED.Id
                                         VALUES (@dateAdded, @productTypeId, @customerId, @price, @title, @description)";
-                    cmd.Parameters.Add(new SqlParameter("@dateAdded", product.DateAdded));
+                    cmd.Parameters.Add(new SqlParameter("@dateAdded", DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")));
                     cmd.Parameters.Add(new SqlParameter("@productTypeId", product.ProductTypeId));
                     cmd.Parameters.Add(new SqlParameter("@customerId", product.CustomerId));
                     cmd.Parameters.Add(new SqlParameter("@price", product.Price));
