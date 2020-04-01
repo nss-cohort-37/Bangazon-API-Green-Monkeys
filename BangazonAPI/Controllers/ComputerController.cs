@@ -32,7 +32,26 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string include)
+        public async Task<IActionResult> Get(
+            [FromQuery] string available)
+        {
+           if(available != "true" && available != "false")
+            {
+                var computers = GetAllComputers(available);
+                return Ok(computers);
+            }else if (available == "true")
+            {
+                var computers = GetAllAvailableComputers(available);
+                return Ok(computers); 
+            }
+            else
+            {
+                var computers = GetAllUnAvailableComputers(available);
+                return Ok(computers);
+
+            }
+        }
+        private List<Computer> GetAllAvailableComputers([FromQuery] string available)
         {
             using (SqlConnection conn = Connection)
             {
@@ -40,10 +59,62 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                    SELECT c.Id, c.PurchaseDate, c.DecomissionDate, c.Make, c.Model
-                    FROM Computer c ";
+                     SELECT c.Id, c.PurchaseDate, c.DecomissionDate, c.Make, c.Model, e.ComputerId
+                    FROM Computer c
+                    LEFT JOIN Employee e
+                    ON e.ComputerId = c.Id";
 
-                 
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Computer> computers = new List<Computer>();
+
+                    while (reader.Read())
+                    {
+                        if (reader.IsDBNull(reader.GetOrdinal("ComputerId"))) { 
+                         
+                            Computer computer = new Computer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                                Make = reader.GetString(reader.GetOrdinal("Make")),
+                                Model = reader.GetString(reader.GetOrdinal("Model"))
+
+                            };
+
+                            if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                            {
+                                computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                            }
+                            else
+                            {
+                                computer.DecomissionDate = null;
+                            }
+                            
+
+                        computers.Add(computer);
+                        }
+                    }
+                    reader.Close();
+
+                    return computers;
+                }
+            }
+        }
+        private List<Computer> GetAllUnAvailableComputers([FromQuery] string available)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                     SELECT c.Id, c.PurchaseDate, c.DecomissionDate, c.Make, c.Model
+                    FROM Computer c
+                    INNER JOIN Employee e
+                    ON e.ComputerId = c.Id";
+
+
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<Computer> computers = new List<Computer>();
@@ -62,15 +133,59 @@ namespace BangazonAPI.Controllers
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
                             computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
-                        }else
+                        }
+                        else
                         {
-                            computer.DecomissionDate = null; 
+                            computer.DecomissionDate = null;
                         }
                         computers.Add(computer);
                     }
                     reader.Close();
 
-                    return Ok(computers);
+                    return computers;
+                }
+            }
+        }
+        private List<Computer> GetAllComputers([FromQuery] string available)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    SELECT c.Id, c.PurchaseDate, c.DecomissionDate, c.Make, c.Model
+                    FROM Computer c ";
+
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Computer> computers = new List<Computer>();
+
+                    while (reader.Read())
+                    {
+                        Computer computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Model = reader.GetString(reader.GetOrdinal("Model"))
+
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+                        else
+                        {
+                            computer.DecomissionDate = null;
+                        }
+                        computers.Add(computer);
+                    }
+                    reader.Close();
+
+                    return computers;
                 }
             }
         }
