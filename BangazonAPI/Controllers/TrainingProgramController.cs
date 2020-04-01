@@ -249,7 +249,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}/employees/{employeeId}")]
         [Route("{id}/employees/{employeeId}")]
 
         public async Task<IActionResult> DeleteEmployeeFromProgram([FromRoute] int id, [FromRoute] int employeeId)
