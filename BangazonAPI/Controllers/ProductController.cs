@@ -49,7 +49,7 @@ namespace BangazonAPI.Controllers
                             DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
                             ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
                             CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            Price = reader.GetDouble(reader.GetOrdinal("Price")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
                             Title = reader.GetString(reader.GetOrdinal("Title")),
                             Description = reader.GetString(reader.GetOrdinal("Description")),
                         };
