@@ -10,7 +10,7 @@ namespace BangazonAPI.Models
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public double Price { get; set; }
+        public decimal Price { get; set; }
         public string Description { get; set; }
         //CustomerId is the seller
         public int CustomerId { get; set; }
