@@ -36,7 +36,8 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText =
-                     @"Select c.Id, c.FirstName, c.LastName, c.CreatedDate, c.Active, c.Address, c.City, c.State, c.Email, c.Phone  
+                     @"Select c.Id, c.FirstName, c.LastName, c.CreatedDate, c.Active, 
+                     c.Address, c.City, c.State, c.Email, c.Phone  
                      FROM Customer c
                      Where 1 = 1";
 
@@ -52,73 +53,95 @@ namespace BangazonAPI.Controllers
 
                     while (reader.Read())
                     {
-                        Customer customer = new Customer
+                        if (reader.GetBoolean(reader.GetOrdinal("Active")) == true)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
-                            Email = reader.GetString(reader.GetOrdinal("Email")),
-                            ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId"))
-                        };
-                        employees.Add(employee);
+                            Customer customer = new Customer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
+                                Active = reader.GetBoolean(reader.GetOrdinal("Active")),
+                                Email = reader.GetString(reader.GetOrdinal("Email")),
+                                Address = reader.GetString(reader.GetOrdinal("Address")),
+                                City = reader.GetString(reader.GetOrdinal("City")),
+                                State = reader.GetString(reader.GetOrdinal("State")),
+                                Phone = reader.GetString(reader.GetOrdinal("Phone"))
+                            };
+                            customers.Add(customer);
+                        }
                     }
                     reader.Close();
-                    return Ok(employees);
+                    return Ok(customers);
                 }
             }
         }
 
-        [HttpGet("{id}", Name = "GetEmployee")]
-        public async Task<IActionResult> Get([FromRoute] int id)
+        [HttpGet("{id}", Name = "GetCustomer")]
+        public async Task<IActionResult> Get([FromRoute] int id, [FromQuery] string include)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"Select e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor, e.Email, e.ComputerId, c.PurchaseDate, c.DecomissionDate, c.Make, c.Model
-                     FROM Employee e
-                     LEFT JOIN Computer c
-                     ON e.ComputerId = c.Id
-                     Where e.Id = @id";
+                    cmd.CommandText = @"
+                        SELECT c.Id, c.FirstName, c.LastName, c.CreatedDate, 
+                        c.Active, c.Email, c.Address, c.City, c.State, c.Phone";
+
+                    if (include == "products")
+                    {
+                        cmd.CommandText += @", p.Id as ProductId, p.Title, p.Description, 
+                                            p.Price, p.CustomerId, p.DateAdded, p.ProductTypeId";
+                    }
+
+                    cmd.CommandText += @" FROM Customer c ";
+
+                    if (include == "products")
+                    {
+                        cmd.CommandText += "LEFT JOIN Product p on p.CustomerId = c.Id ";
+                    }
+
+                    cmd.CommandText += "WHERE c.Id = @id";
+
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    Employee employee = null;
+                    Customer customer = null;
 
                     if (reader.Read())
                     {
-                        employee = new Employee
+                        if (reader.GetBoolean(reader.GetOrdinal("Active")) == true)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
-                            Email = reader.GetString(reader.GetOrdinal("Email")),
-                            ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                            Computer = new Computer
+
+
+                            customer = new Customer
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                                PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-
-                                Make = reader.GetString(reader.GetOrdinal("Make")),
-                                Model = reader.GetString(reader.GetOrdinal("Model"))
-                            }
-
-                        };
-                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
-                        {
-                            employee.Computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
-                        }
-                        else
-                        {
-                            employee.Computer.DecomissionDate = null;
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
+                                Active = reader.GetBoolean(reader.GetOrdinal("Active")),
+                                Email = reader.GetString(reader.GetOrdinal("Email")),
+                                Address = reader.GetString(reader.GetOrdinal("Address")),
+                                City = reader.GetString(reader.GetOrdinal("City")),
+                                State = reader.GetString(reader.GetOrdinal("State")),
+                                Phone = reader.GetString(reader.GetOrdinal("Phone")),
+                                Products = new List<Product>()
+                            };
+                            customer.Products.Add(new Product()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded"))
+                            });
                         }
                         reader.Close();
-                        return Ok(employee);
+                        return Ok(customer);
                     }
                     else
                     {
@@ -127,33 +150,40 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
+
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Employee employee)
+        public async Task<IActionResult> Post([FromBody] Customer customer)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId, IsSupervisor, ComputerId, Email)
+                    cmd.CommandText = @"INSERT INTO Customer (FirstName, LastName, CreatedDate, Active, 
+                                        Address, City, State, Email, Phone)
                                         OUTPUT INSERTED.Id
-                                        VALUES (@firstName, @lastName, @departmentId, @isSupervisor, @computerId, @email)";
-                    cmd.Parameters.Add(new SqlParameter("@firstName", employee.FirstName));
-                    cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
-                    cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
-                    cmd.Parameters.Add(new SqlParameter("@isSupervisor", employee.IsSupervisor));
-                    cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
-                    cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
+                                        VALUES (@FirstName, @LastName, @CreatedDate, 
+                                        @Active, @Address, @email, @City, @State, @Phone)";
+                    cmd.Parameters.Add(new SqlParameter("@FirstName", customer.FirstName));
+                    cmd.Parameters.Add(new SqlParameter("@LastName", customer.LastName));
+                    cmd.Parameters.Add(new SqlParameter("@CreatedDate", DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")));
+                    cmd.Parameters.Add(new SqlParameter("@Active", true));
+                    cmd.Parameters.Add(new SqlParameter("@Address", customer.Address));
+                    cmd.Parameters.Add(new SqlParameter("@email", customer.Email));
+                    cmd.Parameters.Add(new SqlParameter("@Address", customer.Address));
+                    cmd.Parameters.Add(new SqlParameter("@City", customer.City));
+                    cmd.Parameters.Add(new SqlParameter("@State", customer.State));
+                    cmd.Parameters.Add(new SqlParameter("@Phone", customer.Phone));
 
                     int newId = (int)cmd.ExecuteScalar();
-                    employee.Id = newId;
-                    return CreatedAtRoute("GetEmployee", new { id = newId }, employee);
+                    customer.Id = newId;
+                    return CreatedAtRoute("GetCustomer", new { id = newId }, customer);
                 }
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Employee employee)
+        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Customer customer)
         {
             try
             {
@@ -162,7 +192,7 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"UPDATE Employee
+                        cmd.CommandText = @"UPDATE Customer
                                             SET FirstName = @firstName,
                                                 LastName = @lastName,
                                                 DepartmentId = @departmentId,
@@ -171,13 +201,14 @@ namespace BangazonAPI.Controllers
                                                 Email = @email
                                             WHERE Id = @id";
 
-                        cmd.Parameters.Add(new SqlParameter("@firstName", employee.FirstName));
-                        cmd.Parameters.Add(new SqlParameter("@lastName", employee.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@departmentId", employee.DepartmentId));
-                        cmd.Parameters.Add(new SqlParameter("@isSupervisor", employee.IsSupervisor));
-                        cmd.Parameters.Add(new SqlParameter("@computerId", employee.ComputerId));
-                        cmd.Parameters.Add(new SqlParameter("@email", employee.Email));
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.Parameters.Add(new SqlParameter("@FirstName", customer.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@LastName", customer.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@Address", customer.Address));
+                        cmd.Parameters.Add(new SqlParameter("@email", customer.Email));
+                        cmd.Parameters.Add(new SqlParameter("@Address", customer.Address));
+                        cmd.Parameters.Add(new SqlParameter("@City", customer.City));
+                        cmd.Parameters.Add(new SqlParameter("@State", customer.State));
+                        cmd.Parameters.Add(new SqlParameter("@Phone", customer.Phone));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
                         if (rowsAffected > 0)
@@ -211,7 +242,9 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"DELETE FROM Employee WHERE Id = @id";
+                        cmd.CommandText = @"UPDATE Customer 
+                                            SET Active = false
+                                            WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
