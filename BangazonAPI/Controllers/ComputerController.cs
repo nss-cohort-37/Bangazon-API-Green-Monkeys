@@ -320,6 +320,7 @@ namespace BangazonAPI.Controllers
                 {
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
+
                     {
                         cmd.CommandText = @"DELETE FROM Computer WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
