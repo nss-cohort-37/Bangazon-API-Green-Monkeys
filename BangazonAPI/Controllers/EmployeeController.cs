@@ -42,8 +42,8 @@ namespace BangazonAPI.Controllers
 
                     if (firstName != null)
                     {
-                        cmd.CommandText += " AND FirstName Like @firstName";
-                        cmd.Parameters.Add(new SqlParameter("@firstName", "%" + firstName + "%"));
+                            cmd.CommandText += " AND FirstName Like @firstName";
+                            cmd.Parameters.Add(new SqlParameter("@firstName", "%" + firstName + "%"));
                     }
 
                     if (lastName != null)
@@ -249,10 +249,9 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"Select e.Id, e.FirstName, e.LastName, e.DepartmentId, d.Id , d.DeptName  
+                    cmd.CommandText = @"Select e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor, e.Email, e.ComputerId  
                      FROM Employee e
-                     Left Join Department d
-                     On DepartmentId = d.Id Where e.Id = @id";
+                     Where e.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
