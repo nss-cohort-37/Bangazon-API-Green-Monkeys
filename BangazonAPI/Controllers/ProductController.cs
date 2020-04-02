@@ -30,14 +30,14 @@ namespace BangazonAPI.Controllers
         private List<Product> GetAllProducts()
         {
             using (SqlConnection conn = Connection)
-            {   
+            {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText =
                      @"Select p.Id, p.DateAdded, p.ProductTypeId, p.CustomerId, p.Price, p.Title, p.Description
                      FROM Product p";
-                     
+
                     SqlDataReader reader = cmd.ExecuteReader();
                     List<Product> products = new List<Product>();
 
@@ -62,7 +62,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet()]
-        public async Task<IActionResult> Get([FromQuery] string q, [FromQuery] string sortBy)
+        public async Task<IActionResult> Get([FromQuery] string q, [FromQuery] string sortBy, [FromQuery] bool asc)
         {
             if (q != null)
             {
@@ -71,12 +71,22 @@ namespace BangazonAPI.Controllers
             }
             else if (sortBy == "recent")
             {
-               var products = GetRecentProducts();
-               return Ok(products);
+                var products = GetRecentProducts();
+                return Ok(products);
             }
             else if (sortBy == "popularity")
             {
                 var products = GetPopularProducts();
+                return Ok(products);
+            }
+            else if (sortBy == "price" && asc == true)
+            {
+                var products = GetProductsByLeastExpensive();
+                return Ok(products);
+            }
+            else if (sortBy == "price" && asc == false)
+            {
+                var products = GetProductsByMostExpensive();
                 return Ok(products);
             }
             else
@@ -99,7 +109,7 @@ namespace BangazonAPI.Controllers
                      FROM Product p
                      WHERE Title LIKE @q
                      OR Description Like @q";
-                    
+
                     cmd.Parameters.Add(new SqlParameter("@q", "%" + q + "%"));
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -198,6 +208,77 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
+
+        private List<Product> GetProductsByLeastExpensive()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                    @"Select Id, DateAdded, ProductTypeId, CustomerId, Price, Title, Description
+                    FROM Product
+                    Order by Price asc";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    List<Product> products = new List<Product>();
+
+                    while (reader.Read())
+                    {
+                        Product product = new Product
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Description = reader.GetString(reader.GetOrdinal("Description")),
+                        };
+                        products.Add(product);
+                    }
+                    reader.Close();
+                    return products;
+                }
+            }
+        }
+
+        private List<Product> GetProductsByMostExpensive()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                    @"Select Id, DateAdded, ProductTypeId, CustomerId, Price, Title, Description
+                    FROM Product
+                    Order by Price desc";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    List<Product> products = new List<Product>();
+
+                    while (reader.Read())
+                    {
+                        Product product = new Product
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Description = reader.GetString(reader.GetOrdinal("Description")),
+                        };
+                        products.Add(product);
+                    }
+                    reader.Close();
+                    return products;
+                }
+            }
+        }
+
         //post
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Product product)
@@ -219,7 +300,7 @@ namespace BangazonAPI.Controllers
 
                     int newId = (int)cmd.ExecuteScalar();
                     product.Id = newId;
-                    return CreatedAtRoute( new { id = newId }, product);
+                    return CreatedAtRoute(new { id = newId }, product);
                 }
             }
         }
