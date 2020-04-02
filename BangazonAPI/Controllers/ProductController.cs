@@ -27,7 +27,7 @@ namespace BangazonAPI.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> Get()
+        private List<Product> GetAllProducts()
         {
             using (SqlConnection conn = Connection)
             {   
@@ -56,7 +56,107 @@ namespace BangazonAPI.Controllers
                         products.Add(product);
                     }
                     reader.Close();
-                    return Ok(products);
+                    return products;
+                }
+            }
+        }
+
+        [HttpGet()]
+        public async Task<IActionResult> Get([FromQuery] string q, [FromQuery] string sortBy)
+        {
+            if (q != null)
+            {
+                var products = GetProductsByName(q);
+                return Ok(products);
+            }
+            else if (sortBy == "recent")
+            {
+               var products = GetRecentProducts();
+               return Ok(products);
+            }
+            else
+            {
+                var products = GetAllProducts();
+                return Ok(products);
+            }
+            //else if (sortBy == "popularity")
+            //{
+            //    var products = GetPopularProducts();
+            //    return Ok(products)
+            //}
+        }
+
+        [HttpGet]
+        private List<Product> GetProductsByName(string q)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                     @"Select p.Id, p.DateAdded, p.ProductTypeId, p.CustomerId, p.Price, p.Title, p.Description
+                     FROM Product p
+                     WHERE Title LIKE @q
+                     OR Description Like @q";
+                    
+                    cmd.Parameters.Add(new SqlParameter("@q", "%" + q + "%"));
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    List<Product> products = new List<Product>();
+
+                    while (reader.Read())
+                    {
+                        Product product = new Product
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Description = reader.GetString(reader.GetOrdinal("Description")),
+                        };
+                        products.Add(product);
+                    }
+                    reader.Close();
+                    return products;
+                }
+            }
+        }
+
+        [HttpGet]
+        private List<Product> GetRecentProducts()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                     @"Select p.Id, p.DateAdded, p.ProductTypeId, p.CustomerId, p.Price, p.Title, p.Description
+                     FROM Product p
+                     ORDER BY DateAdded desc";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    List<Product> products = new List<Product>();
+
+                    while (reader.Read())
+                    {
+                        Product product = new Product
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Description = reader.GetString(reader.GetOrdinal("Description")),
+                        };
+                        products.Add(product);
+                    }
+                    reader.Close();
+                    return products;
                 }
             }
         }

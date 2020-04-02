@@ -42,8 +42,8 @@ namespace BangazonAPI.Controllers
 
                     if (firstName != null)
                     {
-                        cmd.CommandText += " AND FirstName Like @firstName";
-                        cmd.Parameters.Add(new SqlParameter("@firstName", "%" + firstName + "%"));
+                            cmd.CommandText += " AND FirstName Like @firstName";
+                            cmd.Parameters.Add(new SqlParameter("@firstName", "%" + firstName + "%"));
                     }
 
                     if (lastName != null)
