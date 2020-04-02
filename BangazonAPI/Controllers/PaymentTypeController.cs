@@ -94,5 +94,25 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] PaymentType paymentType)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO PaymentType (Name, Active)
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@name, @active)";
+                    cmd.Parameters.Add(new SqlParameter("@name", paymentType.Name));
+                    cmd.Parameters.Add(new SqlParameter("@active", paymentType.Active));
+                    int newId = (int)cmd.ExecuteScalar();
+                    paymentType.Id = newId;
+                    return CreatedAtRoute("GetPaymentType", new { id = newId }, paymentType);
+                }
+            }
+        }
     }
 }
