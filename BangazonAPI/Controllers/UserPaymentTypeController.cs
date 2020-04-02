@@ -145,7 +145,11 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"DELETE FROM UserPaymentType WHERE Id = @id";
+                        cmd.CommandText = @"UPDATE UserPaymentType
+                                            SET Active = @active
+                                            WHERE Id = @id";
+
+                        cmd.Parameters.Add(new SqlParameter("@Active", false));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
