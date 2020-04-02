@@ -49,6 +49,8 @@ namespace BangazonAPI.Controllers
 
                     while (reader.Read())
                     {
+                        if (reader.GetBoolean(reader.GetOrdinal("Active")) == true)
+                        {
                         UserPaymentType userPaymentType = new UserPaymentType
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -61,6 +63,8 @@ namespace BangazonAPI.Controllers
                         };
 
                         userPaymentTypes.Add(userPaymentType);
+
+                        }
                     }
                     reader.Close();
 
