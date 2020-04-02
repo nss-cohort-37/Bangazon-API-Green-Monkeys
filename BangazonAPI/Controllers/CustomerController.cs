@@ -195,20 +195,21 @@ namespace BangazonAPI.Controllers
                         cmd.CommandText = @"UPDATE Customer
                                             SET FirstName = @firstName,
                                                 LastName = @lastName,
-                                                DepartmentId = @departmentId,
-                                                IsSupervisor = @isSupervisor,
-                                                ComputerId = @computerId,
-                                                Email = @email
+                                                Address = @Address,
+                                                City = @City,
+                                                Email = @email,
+                                                State = @State,
+                                                Phone = @Phone
                                             WHERE Id = @id";
 
                         cmd.Parameters.Add(new SqlParameter("@FirstName", customer.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@LastName", customer.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@Address", customer.Address));
                         cmd.Parameters.Add(new SqlParameter("@email", customer.Email));
                         cmd.Parameters.Add(new SqlParameter("@Address", customer.Address));
                         cmd.Parameters.Add(new SqlParameter("@City", customer.City));
                         cmd.Parameters.Add(new SqlParameter("@State", customer.State));
                         cmd.Parameters.Add(new SqlParameter("@Phone", customer.Phone));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
                         if (rowsAffected > 0)
@@ -221,7 +222,7 @@ namespace BangazonAPI.Controllers
             }
             catch (Exception)
             {
-                if (!EmployeeExists(id))
+                if (!CustomerExists(id))
                 {
                     return NotFound();
                 }
@@ -258,7 +259,7 @@ namespace BangazonAPI.Controllers
             }
             catch (Exception)
             {
-                if (!EmployeeExists(id))
+                if (!CustomerExists(id))
                 {
                     return NotFound();
                 }
@@ -269,17 +270,16 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        private bool EmployeeExists(int id)
+        private bool CustomerExists(int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"Select e.Id, e.FirstName, e.LastName, e.DepartmentId, d.Id , d.DeptName  
-                     FROM Employee e
-                     Left Join Department d
-                     On DepartmentId = d.Id Where e.Id = @id";
+                    cmd.CommandText = @"Select Id, FirstName, LastName, Email, Address , City, State, Phone, Active, CreatedDate  
+                     FROM Customer 
+                     Where e.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
