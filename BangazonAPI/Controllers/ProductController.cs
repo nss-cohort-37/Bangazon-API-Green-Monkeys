@@ -74,16 +74,16 @@ namespace BangazonAPI.Controllers
                var products = GetRecentProducts();
                return Ok(products);
             }
+            else if (sortBy == "popularity")
+            {
+                var products = GetPopularProducts();
+                return Ok(products);
+            }
             else
             {
                 var products = GetAllProducts();
                 return Ok(products);
             }
-            //else if (sortBy == "popularity")
-            //{
-            //    var products = GetPopularProducts();
-            //    return Ok(products)
-            //}
         }
 
         [HttpGet]
@@ -137,6 +137,44 @@ namespace BangazonAPI.Controllers
                      @"Select p.Id, p.DateAdded, p.ProductTypeId, p.CustomerId, p.Price, p.Title, p.Description
                      FROM Product p
                      ORDER BY DateAdded desc";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    List<Product> products = new List<Product>();
+
+                    while (reader.Read())
+                    {
+                        Product product = new Product
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Description = reader.GetString(reader.GetOrdinal("Description")),
+                        };
+                        products.Add(product);
+                    }
+                    reader.Close();
+                    return products;
+                }
+            }
+        }
+        [HttpGet]
+        private List<Product> GetPopularProducts()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                    @"Select p.Id, p.DateAdded, p.ProductTypeId, p.CustomerId, p.Price, p.Title, p.Description, COUNT(p.Id) as ProductCount
+                    FROM Product p
+                    LEFT JOIN OrderProduct op
+                    ON p.Id = op.ProductId
+                    group by p.Id, p.DateAdded, p.ProductTypeId, p.CustomerId, p.Price, p.Title, p.Description
+                    Order by ProductCount desc";
 
                     SqlDataReader reader = cmd.ExecuteReader();
                     List<Product> products = new List<Product>();
