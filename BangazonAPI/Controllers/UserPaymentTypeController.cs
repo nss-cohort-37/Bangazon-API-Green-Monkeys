@@ -93,12 +93,13 @@ namespace BangazonAPI.Controllers
                                         OUTPUT INSERTED.Id
                                         VALUES (@AcctNumber, @Active, @CustomerId, @PaymentTypeId)";
                     cmd.Parameters.Add(new SqlParameter("@AcctNumber", userPaymentType.AcctNumber));
-                    cmd.Parameters.Add(new SqlParameter("@Active", userPaymentType.Active));
+                    cmd.Parameters.Add(new SqlParameter("@Active", true));
                     cmd.Parameters.Add(new SqlParameter("@CustomerId", userPaymentType.CustomerId));
                     cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", userPaymentType.PaymentTypeId));
 
                     int newId = (int)cmd.ExecuteScalar();
                     userPaymentType.Id = newId;
+                    userPaymentType.Active = true; 
                     return CreatedAtRoute( new { id = newId }, userPaymentType);
                 }
             }

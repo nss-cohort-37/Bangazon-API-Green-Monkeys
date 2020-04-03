@@ -107,7 +107,7 @@ namespace BangazonAPI.Controllers
                             };
                         }
 
-                        if (!reader.IsDBNull(reader.GetOrdinal("ProductId")))
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
                         {
                             Employee employeeToAdd = new Employee()
                             {
