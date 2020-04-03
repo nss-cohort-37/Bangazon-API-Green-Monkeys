@@ -12,12 +12,12 @@ namespace BangazonAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DepartmentController : ControllerBase
+    public class DepartmentsController : ControllerBase
     {
 
         private readonly IConfiguration _config;
 
-        public DepartmentController(IConfiguration config)
+        public DepartmentsController(IConfiguration config)
         {
             _config = config;
         }

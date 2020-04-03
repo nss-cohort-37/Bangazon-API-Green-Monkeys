@@ -98,11 +98,11 @@ namespace BangazonAPI.Controllers
 
                             if (!reader.IsDBNull(reader.GetOrdinal("UserPaymentTypeId")))
                             {
-                                order.UserPaymentTypeId = reader.GetInt32(reader.GetOrdinal("UserPaymentTypeId"));
+                                order.UserPaymentId = reader.GetInt32(reader.GetOrdinal("UserPaymentTypeId"));
                             }
                             else
                             {
-                                order.UserPaymentTypeId = null;
+                                order.UserPaymentId = null;
                             }
 
 
@@ -187,11 +187,11 @@ namespace BangazonAPI.Controllers
 
                                 if (!reader.IsDBNull(reader.GetOrdinal("UserPaymentTypeId")))
                                 {
-                                    order.UserPaymentTypeId = reader.GetInt32(reader.GetOrdinal("UserPaymentTypeId"));
+                                    order.UserPaymentId = reader.GetInt32(reader.GetOrdinal("UserPaymentTypeId"));
                                 }
                                 else
                                 {
-                                    order.UserPaymentTypeId = null;
+                                    order.UserPaymentId = null;
                                 }
                             }
                             order.products.Add(new Product()
@@ -260,11 +260,11 @@ namespace BangazonAPI.Controllers
 
                             if (!reader.IsDBNull(reader.GetOrdinal("UserPaymentTypeId")))
                             {
-                                order.UserPaymentTypeId = reader.GetInt32(reader.GetOrdinal("UserPaymentTypeId"));
+                                order.UserPaymentId = reader.GetInt32(reader.GetOrdinal("UserPaymentTypeId"));
                             }
                             else
                             {
-                                order.UserPaymentTypeId = null;
+                                order.UserPaymentId = null;
                             }
                         }
                         order.products.Add(new Product()
@@ -372,7 +372,7 @@ namespace BangazonAPI.Controllers
                                             WHERE Id = @id";
 
                         
-                        cmd.Parameters.Add(new SqlParameter("@UserPaymentTypeId", order.UserPaymentTypeId));
+                        cmd.Parameters.Add(new SqlParameter("@UserPaymentTypeId", order.UserPaymentId));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
