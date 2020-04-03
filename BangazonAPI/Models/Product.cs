@@ -8,6 +8,7 @@ namespace BangazonAPI.Models
 {
     public class Product
     {
+
         public int Id { get; set; }
         public string Title { get; set; }
         public decimal Price { get; set; }
@@ -16,11 +17,6 @@ namespace BangazonAPI.Models
         public int CustomerId { get; set; }
         public int ProductTypeId { get; set; }
         public DateTime DateAdded { get; set; }
-
-
-
-
-
 
     }
 }
