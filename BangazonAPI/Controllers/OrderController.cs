@@ -57,7 +57,7 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                  SELECT o.Id, o.CustomerId, o.UserPaymentTypeId,op.ProductId, p.Title, p.ProductTypeId, p.Price, p.DateAdded, p.Description
+                  SELECT o.Id AS OrderId, o.CustomerId, o.UserPaymentTypeId,op.ProductId, p.Title, p.ProductTypeId, p.Price, p.DateAdded, p.Description, p.Id AS ProductId
                     FROM [OrderProduct] op
                     LEFT JOIN [Order] o 
                     ON o.Id = op.OrderId
@@ -75,14 +75,18 @@ namespace BangazonAPI.Controllers
 
                     Order order = null;
 
+                    //order.Id != reader.GetInt32(reader.GetOrdinal("OrderId"))
                     while (reader.Read())
                     {
-                      if(order == null)
+                        int idValue = reader.GetInt32(reader.GetOrdinal("OrderId"));
+                        var existingOrder = orders.FirstOrDefault(o => o.Id == idValue);
+
+                        if (existingOrder == null)
                         {
 
-                          order = new Order
+                            order = new Order
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Id = idValue,
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
                                 products = new List<Product>()
                             };
@@ -96,29 +100,46 @@ namespace BangazonAPI.Controllers
                                 order.UserPaymentTypeId = null;
                             }
 
+
+                            order.products.Add(new Product()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description"))
+
+                            });
+
+                            orders.Add(order);
+
                         }
-
-                        order.products.Add(new Product()
+                        else
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
-                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
-                            Title = reader.GetString(reader.GetOrdinal("Title")),
-                            Description = reader.GetString(reader.GetOrdinal("Description"))
+                            existingOrder.products.Add(new Product()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description"))
 
-                        });
-
+                            });
+                        }
                     }
-                     orders.Add(order); 
                     reader.Close();
 
-
-                    return orders;
+            
+                    return orders;  
                 }
             }
         }
+
+
         private Order GetAllOrdersByCustomerIdCartTrue([FromQuery] int? customerId)
         {
             using (SqlConnection conn = Connection)
@@ -132,7 +153,8 @@ namespace BangazonAPI.Controllers
                     LEFT JOIN [Order] o 
                     ON o.Id = op.OrderId
                     LEFT JOIN  Product p 
-                    ON p.Id= op.ProductId";
+                    ON p.Id= op.ProductId
+                    WHERE o.customerId = @customerId";
 
                     cmd.Parameters.Add(new SqlParameter("@customerid", customerId));
 
@@ -311,46 +333,106 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> Put([FromRoute] int id, [FromBody] UserPaymentType userPaymentType)
-        //{
-        //    try
-        //    {
-        //        using (SqlConnection conn = Connection)
-        //        {
-        //            conn.Open();
-        //            using (SqlCommand cmd = conn.CreateCommand())
-        //            {
-        //                cmd.CommandText = @"UPDATE Order
-        //                                    SET CustomerId = @CustomerId, UserPaymentTypeId = @UserPaymentTypeId
-        //                                    WHERE Id = @id";
-                      
-        //                cmd.Parameters.Add(new SqlParameter("@CustomerId", userPaymentType.CustomerId));
-        //                cmd.Parameters.Add(new SqlParameter("@UserPaymentTypeId", userPaymentType.UserPaymentTypeId));
-        //                cmd.Parameters.Add(new SqlParameter("@id", id));
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Order order)
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE [Order]
+                                            SET UserPaymentTypeId = @UserPaymentTypeId, CustomerId=CustomerId
+                                            WHERE Id = @id";
 
-        //                int rowsAffected = cmd.ExecuteNonQuery();
-        //                if (rowsAffected > 0)
-        //                {
-        //                    return new StatusCodeResult(StatusCodes.Status204NoContent);
-        //                }
-        //                throw new Exception("No rows affected");
-        //            }
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        if (!UserPaymentTypeExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-        //}
+                        
+                        cmd.Parameters.Add(new SqlParameter("@UserPaymentTypeId", order.UserPaymentTypeId));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
 
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            return new StatusCodeResult(StatusCodes.Status204NoContent);
+                        }
+                        throw new Exception("No rows affected");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                if (!OrderExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+
+
+        [HttpDelete("{id}")]
+        [Route ("{orderId}/products/{productId}")]
+       
+
+        public async Task<IActionResult> Delete([FromRoute] int orderId, [FromRoute] int productId )
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM [OrderProduct] WHERE OrderId = @orderId AND ProductId = @productId";
+
+                        cmd.Parameters.Add(new SqlParameter("@orderId", orderId));
+                        cmd.Parameters.Add(new SqlParameter("@productId", productId));
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            return new StatusCodeResult(StatusCodes.Status204NoContent);
+                        }
+                        throw new Exception("No rows affected");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                if (!OrderExists(orderId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        private bool OrderExists(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, CustomerId, UserPaymentTypeId
+                        FROM [Order]
+                        WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    return reader.Read();
+                }
+            }
+        }
 
 
 
