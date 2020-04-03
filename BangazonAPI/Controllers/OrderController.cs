@@ -303,10 +303,14 @@ namespace BangazonAPI.Controllers
                         cmd.Parameters.Add(new SqlParameter("@UserPaymentTypeId", DBNull.Value));
 
                         int newId = (int)cmd.ExecuteScalar();
-                        cart.Id = newId;
-                        return CreatedAtRoute(new { id = newId }, customerProduct);
+                        cart = new Order()
+                        {
+                            Id= newId, 
+                            CustomerId= customerProduct.CustomerId
+                        };
+                       
 
-                        //return Ok(newId); 
+                       
                     }
 
                     //insert into orderproducts; we need the Id made on line 274
@@ -327,7 +331,7 @@ namespace BangazonAPI.Controllers
 
                     int newerId = (int)cmd.ExecuteScalar();
                    customerProduct.Id = newerId;
-                    return CreatedAtRoute(new { id = newerId },customerProduct);
+                    return CreatedAtRoute(new { id = cart.Id }, new Order { CustomerId = customerProduct.CustomerId, Id = cart.Id });
 
                 }
             }
