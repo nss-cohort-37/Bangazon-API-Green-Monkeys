@@ -76,7 +76,7 @@ namespace BangazonAPI.Controllers
 
                     while (reader.Read())
                     {
-                        if (reader.IsDBNull(reader.GetOrdinal("ComputerId"))) { 
+                        if (reader.IsDBNull(reader.GetOrdinal("ComputerId")) && reader.IsDBNull(reader.GetOrdinal("DecomissionDate"))) { 
                          
                             Computer computer = new Computer
                             {
@@ -87,14 +87,14 @@ namespace BangazonAPI.Controllers
 
                             };
 
-                            if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
-                            {
-                                computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
-                            }
-                            else
-                            {
-                                computer.DecomissionDate = null;
-                            }
+                            //if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                            //{
+                            //    computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                            //}
+                            //else
+                            //{
+                            //    computer.DecomissionDate = null;
+                            //}
                             
 
                         computers.Add(computer);
@@ -169,6 +169,7 @@ namespace BangazonAPI.Controllers
 
                     while (reader.Read())
                     {
+                      
                         Computer computer = new Computer
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
