@@ -29,6 +29,7 @@ namespace BangazonAPI.Controllers
         }
 
         //api/userPaymentTypes? customerId = { customer id }
+        [HttpGet]
         public async Task<IActionResult> Get([FromQuery] int? customerId)
         {
             using (SqlConnection conn = Connection)

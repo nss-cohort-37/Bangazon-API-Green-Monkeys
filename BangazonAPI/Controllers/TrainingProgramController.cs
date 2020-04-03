@@ -149,8 +149,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("{id}/employees")]
+        [HttpPost("{id}/employees")]
         public async Task<IActionResult> Post([FromBody] Employee employee, [FromRoute] int id)
         {
             using (SqlConnection conn = Connection)
@@ -250,8 +249,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpDelete("{id}/employees/{employeeId}")]
-        [Route("{id}/employees/{employeeId}")]
-
+        //[Route("{id}/employees/{employeeId}")]
         public async Task<IActionResult> DeleteEmployeeFromProgram([FromRoute] int id, [FromRoute] int employeeId)
         {
             try

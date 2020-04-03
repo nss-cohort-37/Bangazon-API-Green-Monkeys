@@ -30,7 +30,7 @@ namespace BangazonAPI.Controllers
         }
 
         //api/orders?customerId={customerId}&cart=true
-
+        [HttpGet]
         public async Task<IActionResult> Get(
             [FromQuery] int? customerId, 
             [FromQuery] string cart)
@@ -381,10 +381,7 @@ namespace BangazonAPI.Controllers
 
 
 
-        [HttpDelete("{id}")]
-        [Route ("{orderId}/products/{productId}")]
-       
-
+        [HttpDelete("{orderId}/products/{productId}")]
         public async Task<IActionResult> Delete([FromRoute] int orderId, [FromRoute] int productId )
         {
             try

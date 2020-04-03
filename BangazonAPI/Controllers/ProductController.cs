@@ -61,7 +61,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        [HttpGet()]
+        [HttpGet]
         public async Task<IActionResult> Get([FromQuery] string q, [FromQuery] string sortBy, [FromQuery] bool asc)
         {
             if (q != null)
