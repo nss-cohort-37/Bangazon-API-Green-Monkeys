@@ -57,7 +57,7 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                  SELECT o.Id AS OrderId, o.CustomerId, o.UserPaymentTypeId,op.ProductId, p.Title, p.ProductTypeId, p.Price, p.DateAdded, p.Description, p.Id AS ProductId
+                  SELECT o.Id AS OrderId, o.CustomerId, o.UserPaymentTypeId, op.ProductId, p.Title, p.ProductTypeId, p.Price, p.DateAdded, p.Description, p.Id AS ProductId
                     FROM [OrderProduct] op
                     LEFT JOIN [Order] o 
                     ON o.Id = op.OrderId
@@ -148,7 +148,7 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                   SELECT o.Id, o.CustomerId, o.UserPaymentTypeId,op.ProductId, p.Title, p.ProductTypeId, p.Price, p.DateAdded, p.Description
+                   SELECT o.Id AS OrderId, o.CustomerId, o.UserPaymentTypeId, op.ProductId, p.Title, p.ProductTypeId, p.Price, p.DateAdded, p.Description, p.Id AS ProductId
                     FROM [OrderProduct] op
                     LEFT JOIN [Order] o 
                     ON o.Id = op.OrderId
@@ -174,7 +174,7 @@ namespace BangazonAPI.Controllers
                             {
                                 order = new Order
                                 {
-                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Id = reader.GetInt32(reader.GetOrdinal("OrderId")),
                                     CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
 
                                     products = new List<Product>()
@@ -191,7 +191,7 @@ namespace BangazonAPI.Controllers
                             }
                             order.products.Add(new Product()
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
                                 DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
                                 ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
@@ -222,10 +222,12 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                    SELECT o.Id, o.CustomerId, o.UserPaymentTypeId, p.CustomerId, p.Title, p.ProductTypeId, p.Price, p.DateAdded, p.Description
-                    FROM [Order] o 
+                   SELECT o.Id AS OrderId, o.CustomerId, o.UserPaymentTypeId, op.ProductId, p.Title, p.ProductTypeId, p.Price, p.DateAdded, p.Description, p.Id AS ProductId
+                    FROM [OrderProduct] op
+                    LEFT JOIN [Order] o 
+                    ON o.Id = op.OrderId
                     LEFT JOIN  Product p 
-                    ON p.CustomerId = o.customerId
+                    ON p.Id= op.ProductId
                     WHERE o.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", Id));
@@ -241,7 +243,7 @@ namespace BangazonAPI.Controllers
                         {
                             order = new Order
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Id = reader.GetInt32(reader.GetOrdinal("OrderId")),
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
 
                                 products = new List<Product>()
@@ -258,7 +260,7 @@ namespace BangazonAPI.Controllers
                         }
                         order.products.Add(new Product()
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
                             DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")),
                             ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
                             CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
