@@ -10,7 +10,7 @@ namespace BangazonAPI.Models
         public int Id { get; set; }
         public int CustomerId { get; set; }
 
-        public int? UserPaymentTypeId { get; set; }
+        public int? UserPaymentId { get; set; }
 
         public List<Product> products  { get; set; }
     }

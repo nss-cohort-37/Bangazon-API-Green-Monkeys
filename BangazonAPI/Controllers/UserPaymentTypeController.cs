@@ -58,7 +58,7 @@ namespace BangazonAPI.Controllers
                         UserPaymentType userPaymentType = new UserPaymentType
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            AccountNumber = reader.GetString(reader.GetOrdinal("AcctNumber")),
+                            AcctNumber = reader.GetString(reader.GetOrdinal("AcctNumber")),
                             Active = reader.GetBoolean(reader.GetOrdinal("Active")),
                             CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
                             PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"))
@@ -92,7 +92,7 @@ namespace BangazonAPI.Controllers
                     cmd.CommandText = @"INSERT INTO UserPaymentType (AcctNumber, Active, CustomerId, PaymentTypeId)
                                         OUTPUT INSERTED.Id
                                         VALUES (@AcctNumber, @Active, @CustomerId, @PaymentTypeId)";
-                    cmd.Parameters.Add(new SqlParameter("@AcctNumber", userPaymentType.AccountNumber));
+                    cmd.Parameters.Add(new SqlParameter("@AcctNumber", userPaymentType.AcctNumber));
                     cmd.Parameters.Add(new SqlParameter("@Active", userPaymentType.Active));
                     cmd.Parameters.Add(new SqlParameter("@CustomerId", userPaymentType.CustomerId));
                     cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", userPaymentType.PaymentTypeId));
@@ -123,7 +123,7 @@ namespace BangazonAPI.Controllers
                         cmd.CommandText = @"UPDATE UserPaymentType
                                             SET AcctNumber = @AcctNumber, Active = @Active, CustomerId = @CustomerId, PaymentTypeId = @PaymentTypeId
                                             WHERE Id = @id";
-                        cmd.Parameters.Add(new SqlParameter("@AcctNumber", userPaymentType.AccountNumber));
+                        cmd.Parameters.Add(new SqlParameter("@AcctNumber", userPaymentType.AcctNumber));
                         cmd.Parameters.Add(new SqlParameter("@Active", userPaymentType.Active));
                         cmd.Parameters.Add(new SqlParameter("@CustomerId", userPaymentType.CustomerId));
                         cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", userPaymentType.PaymentTypeId));
