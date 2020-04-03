@@ -28,7 +28,10 @@ namespace BangazonAPI.Controllers
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -64,7 +67,11 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}", Name = "GetTrainingProgram")]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
@@ -125,7 +132,11 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="trainingProgram"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] TrainingProgram trainingProgram)
         {
@@ -148,9 +159,13 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
-        [HttpPost]
-        [Route("{id}/employees")]
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost("{id}/employees")]
         public async Task<IActionResult> Post([FromBody] Employee employee, [FromRoute] int id)
         {
             using (SqlConnection conn = Connection)
@@ -169,7 +184,12 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="trainingProgram"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] TrainingProgram trainingProgram)
         {
@@ -213,7 +233,11 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -248,10 +272,13 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="employeeId"></param>
+        /// <returns></returns>
         [HttpDelete("{id}/employees/{employeeId}")]
-        [Route("{id}/employees/{employeeId}")]
-
         public async Task<IActionResult> DeleteEmployeeFromProgram([FromRoute] int id, [FromRoute] int employeeId)
         {
             try

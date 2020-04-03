@@ -29,8 +29,13 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //api/orders?customerId={customerId}&cart=true
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="cart"></param>
+        /// <returns></returns>
+        [HttpGet]
         public async Task<IActionResult> Get(
             [FromQuery] int? customerId, 
             [FromQuery] string cart)
@@ -212,7 +217,11 @@ namespace BangazonAPI.Controllers
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         [HttpGet("{id}", Name = "GetOrder")]
         public async Task<IActionResult> Get([FromRoute] int Id)
         {
@@ -279,7 +288,11 @@ namespace BangazonAPI.Controllers
         }
 
         //Add a product to shopping cart; check to see if user has cart and if not make a cart--which is an order with UserPayment is null 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerProduct"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CustomerProduct customerProduct)
         {
@@ -338,7 +351,12 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Order order)
         {
@@ -380,11 +398,13 @@ namespace BangazonAPI.Controllers
         }
 
 
-
-        [HttpDelete("{id}")]
-        [Route ("{orderId}/products/{productId}")]
-       
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        [HttpDelete("{orderId}/products/{productId}")]
         public async Task<IActionResult> Delete([FromRoute] int orderId, [FromRoute] int productId )
         {
             try

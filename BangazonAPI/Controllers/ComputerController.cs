@@ -30,7 +30,11 @@ namespace BangazonAPI.Controllers
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="available"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Get(
             [FromQuery] string available)
@@ -51,6 +55,7 @@ namespace BangazonAPI.Controllers
 
             }
         }
+
         private List<Computer> GetAllAvailableComputers([FromQuery] string available)
         {
             using (SqlConnection conn = Connection)
@@ -189,7 +194,11 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         [HttpGet("{id}", Name = "GetComputer")]
         public async Task<IActionResult> Get([FromRoute] int Id)
         {
@@ -233,7 +242,11 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="computer"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Computer computer)
         {
@@ -259,7 +272,12 @@ namespace BangazonAPI.Controllers
         }
 
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="computer"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Computer computer)
         {
@@ -310,7 +328,11 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
